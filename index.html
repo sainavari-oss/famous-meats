@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Famous Meats">
+<title>Famous Meats — Order Entry</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23c0392b'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='white' font-family='system-ui'%3E🍗%3C/text%3E%3C/svg%3E">
+<style>
+  * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; background: #f4f4f7; color: #1c1c1e; -webkit-text-size-adjust: 100%; }
+  body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); padding-bottom: 100px; }
+  header { background: #c0392b; color: white; padding: 18px 16px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  header h1 { margin: 0; font-size: 20px; font-weight: 700; }
+  header .sub { font-size: 12px; opacity: 0.85; margin-top: 2px; }
+  .tabs { display: flex; background: white; position: sticky; top: 60px; z-index: 99; border-bottom: 1px solid #e5e5ea; }
+  .tab { flex: 1; padding: 14px; text-align: center; font-size: 14px; font-weight: 600; color: #8e8e93; border-bottom: 3px solid transparent; }
+  .tab.active { color: #c0392b; border-bottom-color: #c0392b; }
+  .container { padding: 16px; max-width: 600px; margin: 0 auto; }
+  .card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  label { display: block; font-size: 12px; font-weight: 600; color: #6c6c70; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 6px; }
+  select, input[type="text"], input[type="number"], input[type="date"] {
+    width: 100%; padding: 14px; font-size: 17px; border: 1px solid #d1d1d6; border-radius: 10px; background: white; color: #1c1c1e; -webkit-appearance: none; appearance: none;
+  }
+  select { background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 12px center; background-size: 18px; padding-right: 40px; }
+  input:focus, select:focus { outline: none; border-color: #c0392b; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  button { font-family: inherit; cursor: pointer; }
+  .btn { width: 100%; padding: 16px; font-size: 17px; font-weight: 600; border: none; border-radius: 12px; background: #c0392b; color: white; }
+  .btn:active { background: #962d22; }
+  .btn-secondary { background: #f2f2f7; color: #c0392b; }
+  .btn-secondary:active { background: #e5e5ea; }
+  .btn-ghost { background: transparent; color: #8e8e93; padding: 8px; }
+  .calc { background: #fff5f3; border: 1px solid #f5d0ca; border-radius: 10px; padding: 12px; margin-bottom: 14px; font-size: 14px; }
+  .calc-row { display: flex; justify-content: space-between; padding: 4px 0; }
+  .calc-row.total { font-weight: 700; font-size: 16px; border-top: 1px solid #f5d0ca; padding-top: 8px; margin-top: 4px; }
+  .calc .label-text { color: #6c6c70; }
+  .calc .margin-pos { color: #1d8f4b; font-weight: 600; }
+  .calc .margin-neg { color: #c0392b; font-weight: 600; }
+  .order-item { background: white; border-radius: 12px; padding: 14px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .order-item .top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .order-item .resto { font-weight: 700; font-size: 15px; }
+  .order-item .date { font-size: 12px; color: #8e8e93; }
+  .order-item .item-line { font-size: 14px; color: #3c3c43; padding: 4px 0; display: flex; justify-content: space-between; }
+  .order-item .totals { border-top: 1px solid #e5e5ea; padding-top: 8px; margin-top: 8px; display: flex; justify-content: space-between; font-size: 13px; }
+  .order-item .delete { background: transparent; color: #c0392b; border: none; font-size: 13px; padding: 4px 0; }
+  .empty-state { text-align: center; padding: 40px 20px; color: #8e8e93; }
+  .empty-state .emoji { font-size: 48px; margin-bottom: 12px; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .stat { background: white; border-radius: 12px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .stat .label { font-size: 11px; color: #8e8e93; text-transform: uppercase; font-weight: 600; }
+  .stat .value { font-size: 22px; font-weight: 700; color: #1c1c1e; margin-top: 4px; }
+  .stat .value.green { color: #1d8f4b; }
+  .line-row { display: grid; grid-template-columns: 2fr 1fr 1fr 32px; gap: 8px; align-items: end; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #e5e5ea; }
+  .line-row:last-of-type { border-bottom: none; }
+  .line-row .remove { background: #f2f2f7; border: none; border-radius: 8px; height: 46px; color: #c0392b; font-size: 18px; }
+  .add-line { width: 100%; padding: 12px; background: #f2f2f7; color: #c0392b; border: 1px dashed #c0392b; border-radius: 10px; font-weight: 600; font-size: 14px; }
+  .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #1c1c1e; color: white; padding: 12px 20px; border-radius: 24px; font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 200; }
+  .toast.show { opacity: 1; }
+  .small-input { padding: 12px; font-size: 15px; }
+  .item-header { font-size: 11px; color: #8e8e93; text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🍗 Famous Meats</h1>
+  <div class="sub">Order Entry</div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" data-tab="entry" onclick="switchTab('entry')">New Order</div>
+  <div class="tab" data-tab="orders" onclick="switchTab('orders')">Orders</div>
+  <div class="tab" data-tab="export" onclick="switchTab('export')">Export</div>
+</div>
+
+<div class="container">
+
+  <!-- ENTRY TAB -->
+  <div id="tab-entry">
+    <div class="card">
+      <div class="row">
+        <div class="field">
+          <label>Date</label>
+          <input type="date" id="orderDate">
+        </div>
+        <div class="field">
+          <label>Restaurant</label>
+          <select id="restaurant" onchange="onRestaurantChange()">
+            <option value="">Select...</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <label style="margin-bottom:10px;">Line Items</label>
+      <div id="lineItems"></div>
+      <button class="add-line" onclick="addLine()">+ Add Item</button>
+    </div>
+
+    <div class="calc" id="calcBox">
+      <div class="calc-row"><span class="label-text">Subtotal</span><span id="cSubtotal">$0.00</span></div>
+      <div class="calc-row"><span class="label-text">Cutting Charges</span><span id="cCutting">$0.00</span></div>
+      <div class="calc-row total"><span>Total</span><span id="cTotal">$0.00</span></div>
+      <div class="calc-row"><span class="label-text">Estimated Margin</span><span id="cMargin" class="margin-pos">$0.00 (0%)</span></div>
+    </div>
+
+    <button class="btn" onclick="saveOrder()">Save Order</button>
+    <button class="btn btn-secondary" style="margin-top:8px;" onclick="clearForm()">Clear</button>
+  </div>
+
+  <!-- ORDERS TAB -->
+  <div id="tab-orders" style="display:none;">
+    <div class="stat-grid">
+      <div class="stat"><div class="label">Total Orders</div><div class="value" id="statCount">0</div></div>
+      <div class="stat"><div class="label">Total Revenue</div><div class="value" id="statRevenue">$0</div></div>
+      <div class="stat"><div class="label">Total Margin</div><div class="value green" id="statMargin">$0</div></div>
+      <div class="stat"><div class="label">Avg Margin %</div><div class="value green" id="statPct">0%</div></div>
+    </div>
+    <div id="ordersList"></div>
+  </div>
+
+  <!-- EXPORT TAB -->
+  <div id="tab-export" style="display:none;">
+    <div class="card">
+      <p style="margin:0 0 14px 0; color:#3c3c43; font-size:14px;">Download all saved orders as an Excel file matching the Resto Details format.</p>
+      <button class="btn" onclick="exportXlsx()">Download Excel (.xlsx)</button>
+      <button class="btn btn-secondary" style="margin-top:8px;" onclick="exportCsv()">Download CSV</button>
+    </div>
+    <div class="card">
+      <label>Manage Data</label>
+      <p style="font-size:13px; color:#6c6c70; margin:8px 0 14px 0;">Save a backup or restore from one. Data lives only on this device.</p>
+      <button class="btn btn-secondary" onclick="backupJson()">Backup as JSON</button>
+      <button class="btn btn-secondary" style="margin-top:8px;" onclick="document.getElementById('restoreFile').click()">Restore from Backup</button>
+      <input type="file" id="restoreFile" accept=".json" style="display:none" onchange="restoreJson(event)">
+      <button class="btn btn-secondary" style="margin-top:8px; color:#c0392b;" onclick="if(confirm('Delete ALL saved orders? This cannot be undone.')){localStorage.removeItem('fm_orders'); refresh();}">Delete All Orders</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script>
+
+const RESTAURANTS = ["Ali","Bawarchi Naperville","Bawarchi Schaumburg","Hyderabadi House","Indiamart","Kritunga","Tapri","Turmeric","Vatan"];
+
+const ITEMS = ["Thighs","Chicken Thigh","Whole Chicken","Reg Chicken","Reg Chicken Biryani","Reg Chicken Curry","Country Chicken","Leg Quarters","Wings","chicken wings","Breast","Drumsticks","Goat","Goat Biryani","Goat Curry","Goat (Haleem)","Baby Goat","Lamb","Boneless Lamb","Lamb Boneless","Lamb Chop","Lamb Chops","Mutton Bone in","Mutton Boneless cube","Mutton Nalli with Meat","Paya","Paya Bones"];
+
+const COSTS = {"Thighs":1.7225,"Chicken Thigh":1.7225,"Whole Chicken":1.3025,"Reg Chicken":1.463902,"Reg Chicken Biryani":1.463902,"Reg Chicken Curry":1.463902,"Country Chicken":5.99,"Leg Quarters":0.722868,"Wings":1.80,"chicken wings":1.80,"Breast":1.69,"Drumsticks":0.7525,"Goat":4.648556,"Goat Biryani":4.648556,"Goat Curry":4.648556,"Goat (Haleem)":4.648556,"Baby Goat":10.99,"Lamb":6.75,"Boneless Lamb":6.75,"Lamb Boneless":6.75,"Lamb Chop":15.99,"Lamb Chops":15.99,"Mutton Bone in":4.648556,"Mutton Boneless cube":6.75,"Mutton Nalli with Meat":5.99,"Paya":4.24,"Paya Bones":4.24};
+
+const RESTO_PRICES = {"Ali":{"Reg Chicken":1.60,"Goat":5.99,"Goat Biryani":5.99,"Goat Curry":5.99,"Reg Chicken Biryani":1.60,"Reg Chicken Curry":1.60},"Bawarchi Naperville":{"Thighs":2.69,"Goat":5.99,"Goat (Haleem)":6.49,"Whole Chicken":1.60,"Reg Chicken":1.60},"Bawarchi Schaumburg":{"Thighs":2.79,"Leg Quarters":0.89,"Goat":5.99},"Hyderabadi House":{"Thighs":2.69,"Paya":4.79},"Indiamart":{"Reg Chicken":2.49,"Leg Quarters":2.49,"Goat":10.99,"Baby Goat":12.99,"Country Chicken":11.99},"Kritunga":{"Leg Quarters":0.89,"Country Chicken":8.99,"Paya":4.79,"Paya Bones":4.79},"Tapri":{"Thighs":2.69,"Chicken Thigh":2.79,"Goat":5.99,"Boneless Lamb":7.99,"Lamb":7.99,"Whole Chicken":1.60},"Vatan":{"Thighs":2.69,"Lamb Chop":17.99,"Lamb Chops":17.99,"Boneless Lamb":7.99,"Lamb Boneless":7.99,"Mutton Bone in":5.99,"Mutton Boneless cube":7.99,"Mutton Nalli with Meat":7.99,"chicken wings":2.59},"Turmeric":{"Goat":6.20}};
+
+const DEFAULT_PRICES = {"Thighs":2.69,"Chicken Thigh":2.79,"Whole Chicken":1.60,"Reg Chicken":1.60,"Reg Chicken Biryani":1.60,"Reg Chicken Curry":1.60,"Country Chicken":8.99,"Leg Quarters":0.89,"Wings":1.80,"chicken wings":2.59,"Breast":1.99,"Drumsticks":0.95,"Goat":5.99,"Goat Biryani":5.99,"Goat Curry":5.99,"Goat (Haleem)":6.49,"Baby Goat":12.99,"Lamb":7.99,"Boneless Lamb":7.99,"Lamb Boneless":7.99,"Lamb Chop":17.99,"Lamb Chops":17.99,"Mutton Bone in":5.99,"Mutton Boneless cube":7.99,"Mutton Nalli with Meat":7.99,"Paya":4.79,"Paya Bones":4.79};
+
+// init
+function init() {
+  const sel = document.getElementById('restaurant');
+  RESTAURANTS.forEach(r => { const o = document.createElement('option'); o.value = r; o.textContent = r; sel.appendChild(o); });
+  document.getElementById('orderDate').value = new Date().toISOString().slice(0,10);
+  addLine();
+  refresh();
+}
+
+function switchTab(name) {
+  ['entry','orders','export'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===name ? 'block' : 'none';
+    document.querySelector(`.tab[data-tab="${t}"]`).classList.toggle('active', t===name);
+  });
+  if (name==='orders') refresh();
+}
+
+function addLine() {
+  const idx = document.querySelectorAll('.line-row').length;
+  const div = document.createElement('div');
+  div.className = 'line-row';
+  div.innerHTML = `
+    <div>
+      ${idx===0?'<div class="item-header">Item</div>':''}
+      <select class="line-item small-input" onchange="onItemChange(this)">
+        <option value="">Item...</option>
+        ${ITEMS.map(i=>`<option value="${i}">${i}</option>`).join('')}
+      </select>
+    </div>
+    <div>
+      ${idx===0?'<div class="item-header">Lbs</div>':''}
+      <input type="number" inputmode="decimal" step="0.01" placeholder="Lbs" class="line-lbs small-input" oninput="recalc()">
+    </div>
+    <div>
+      ${idx===0?'<div class="item-header">$/lb</div>':''}
+      <input type="number" inputmode="decimal" step="0.01" placeholder="Price" class="line-price small-input" oninput="recalc()">
+    </div>
+    <button class="remove" onclick="removeLine(this)">×</button>
+  `;
+  document.getElementById('lineItems').appendChild(div);
+  // also add cutting input row inline (compact below)
+  // Actually keep cutting separate per line
+  const cuttingDiv = document.createElement('div');
+  cuttingDiv.className = 'line-row';
+  cuttingDiv.style.gridTemplateColumns = '1fr';
+  cuttingDiv.style.marginTop = '-6px';
+  cuttingDiv.innerHTML = `<input type="number" inputmode="decimal" step="0.01" placeholder="Cutting charges (optional)" class="line-cutting small-input" oninput="recalc()">`;
+  div.appendChild(cuttingDiv);
+}
+
+function removeLine(btn) {
+  if (document.querySelectorAll('.line-row').length <= 1) {
+    showToast('At least one line required');
+    return;
+  }
+  btn.closest('.line-row').remove();
+  recalc();
+}
+
+function onRestaurantChange() {
+  // re-trigger price autofill on all lines
+  document.querySelectorAll('.line-row').forEach(row => {
+    const sel = row.querySelector('.line-item');
+    if (sel && sel.value) {
+      autofillPrice(row);
+    }
+  });
+  recalc();
+}
+
+function onItemChange(selectEl) {
+  const row = selectEl.closest('.line-row');
+  autofillPrice(row);
+  recalc();
+}
+
+function autofillPrice(row) {
+  const item = row.querySelector('.line-item').value;
+  const priceInput = row.querySelector('.line-price');
+  const resto = document.getElementById('restaurant').value;
+  if (!item) return;
+  // priority: resto-specific → default
+  let price = null;
+  if (resto && RESTO_PRICES[resto] && RESTO_PRICES[resto][item] != null) {
+    price = RESTO_PRICES[resto][item];
+  } else if (DEFAULT_PRICES[item] != null) {
+    price = DEFAULT_PRICES[item];
+  }
+  // only autofill if user hasn't typed something
+  if (price != null && !priceInput.value) {
+    priceInput.value = price.toFixed(2);
+  }
+}
+
+function recalc() {
+  let subtotal = 0, cutting = 0, cost = 0;
+  document.querySelectorAll('.line-row').forEach(row => {
+    const item = row.querySelector('.line-item');
+    const lbs = parseFloat(row.querySelector('.line-lbs')?.value) || 0;
+    const price = parseFloat(row.querySelector('.line-price')?.value) || 0;
+    const cut = parseFloat(row.querySelector('.line-cutting')?.value) || 0;
+    if (item && item.value && lbs > 0) {
+      subtotal += lbs * price;
+      cutting += cut;
+      const c = COSTS[item.value] || 0;
+      cost += lbs * c;
+    }
+  });
+  const total = subtotal + cutting;
+  const margin = total - cost;
+  const pct = total > 0 ? (margin/total*100) : 0;
+  document.getElementById('cSubtotal').textContent = '$'+subtotal.toFixed(2);
+  document.getElementById('cCutting').textContent = '$'+cutting.toFixed(2);
+  document.getElementById('cTotal').textContent = '$'+total.toFixed(2);
+  const mEl = document.getElementById('cMargin');
+  mEl.textContent = '$'+margin.toFixed(2)+' ('+pct.toFixed(1)+'%)';
+  mEl.className = margin >= 0 ? 'margin-pos' : 'margin-neg';
+}
+
+// Invoice number: ABBREV + M + DD + YY (e.g. BWN3226 = BWN March 2 2026)
+const RESTO_ABBREV = {
+  "Ali":"Ali","Bawarchi Naperville":"BWN","Bawarchi Schaumburg":"BWS",
+  "Hyderabadi House":"HH","Indiamart":"IM","Kritunga":"KT",
+  "Tapri":"TP","Turmeric":"TM","Vatan":"VT"
+};
+
+function makeInvoiceNumber(restaurant, dateStr) {
+  const abbrev = RESTO_ABBREV[restaurant] || restaurant.replace(/[^A-Za-z]/g,'').slice(0,3).toUpperCase();
+  const d = new Date(dateStr+'T00:00:00');
+  const m = d.getMonth()+1;
+  const day = d.getDate();
+  const yy = String(d.getFullYear()).slice(-2);
+  return `${abbrev}${m}${day}${yy}`;
+}
+
+function generateInvoicePDF(order) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+  const pageW = doc.internal.pageSize.getWidth();
+  const margin = 50;
+
+  // Header banner
+  doc.setFillColor(192, 57, 43);
+  doc.rect(margin, margin, pageW - margin*2, 60, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(28);
+  doc.text('🍗 FAMOUS MEATS', pageW/2, margin + 32, { align:'center' });
+  doc.setFontSize(10);
+  doc.setFont('helvetica','normal');
+  doc.text('HALAL', pageW/2, margin + 50, { align:'center' });
+
+  // Address
+  doc.setTextColor(60,60,60);
+  doc.setFontSize(10);
+  doc.text('1334 N Roselle Rd, Schaumburg, IL 60195', pageW/2, margin + 80, { align:'center' });
+
+  // Date / Customer / Invoice # rows
+  const infoY = margin + 100;
+  doc.setFillColor(230,230,230);
+  doc.rect(margin, infoY, pageW - margin*2, 22, 'F');
+  doc.setTextColor(0,0,0);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(11);
+  doc.text('Date', margin + 10, infoY + 15);
+  doc.setFont('helvetica','normal');
+  const dateFmt = new Date(order.date+'T00:00:00').toLocaleDateString('en-US');
+  doc.text(dateFmt, pageW/2, infoY + 15, { align:'center' });
+
+  doc.setFillColor(230,230,230);
+  doc.rect(margin, infoY + 22, pageW - margin*2, 22, 'F');
+  doc.setFont('helvetica','bold');
+  doc.text('Customer Name/Address', margin + 10, infoY + 37);
+  doc.setFont('helvetica','normal');
+  doc.text(order.restaurant, pageW/2, infoY + 37, { align:'center' });
+
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(10);
+  doc.text(`Invoice number: ${order.invoiceNumber}`, margin, infoY + 62);
+
+  // Line items table
+  const body = order.lines.map((l, i) => {
+    const amt = l.lbs*l.price + (l.cutting||0);
+    return [
+      String(i+1),
+      i===0 ? new Date(order.date+'T00:00:00').toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'2-digit'}) : '',
+      l.item,
+      l.lbs.toFixed(2),
+      l.price.toFixed(2),
+      l.cutting ? l.cutting.toFixed(2) : '',
+      '$'+amt.toFixed(2)
+    ];
+  });
+
+  // pad to 11 rows like the original invoices
+  while (body.length < 11) body.push([String(body.length+1),'','','','','','']);
+
+  let subtotal = 0;
+  order.lines.forEach(l => { subtotal += l.lbs*l.price + (l.cutting||0); });
+
+  doc.autoTable({
+    startY: infoY + 75,
+    head: [['S.No','Date','Item','Qty/Lbs','Unit Price','Cutting Charges','Total']],
+    body: body,
+    theme: 'grid',
+    headStyles: { fillColor: [220,220,220], textColor: [0,0,0], fontStyle:'bold', fontSize: 10 },
+    bodyStyles: { fontSize: 10, minCellHeight: 20 },
+    columnStyles: {
+      0: { cellWidth: 35, halign:'center' },
+      1: { cellWidth: 65 },
+      2: { cellWidth: 150 },
+      3: { cellWidth: 60, halign:'right' },
+      4: { cellWidth: 60, halign:'right' },
+      5: { cellWidth: 75, halign:'right' },
+      6: { cellWidth: 70, halign:'right' }
+    },
+    margin: { left: margin, right: margin }
+  });
+
+  let y = doc.lastAutoTable.finalY + 5;
+
+  // Subtotal / Total rows
+  const totalsX = pageW - margin - 145;
+  doc.setFontSize(11);
+  doc.setFont('helvetica','bold');
+  doc.text('SUBTOTAL', totalsX, y + 14);
+  doc.setFont('helvetica','normal');
+  doc.text('$'+subtotal.toFixed(2), pageW - margin - 8, y + 14, { align:'right' });
+  doc.rect(totalsX - 8, y, 153, 20);
+
+  y += 60;
+  doc.setFillColor(220,220,220);
+  doc.rect(totalsX - 8, y, 153, 22, 'F');
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(12);
+  doc.text('GRAND INVOICE TOTAL', totalsX, y + 15);
+  doc.text('$'+subtotal.toFixed(2), pageW - margin - 8, y + 15, { align:'right' });
+  doc.rect(totalsX - 8, y, 153, 22);
+
+  // Footer
+  y += 60;
+  doc.setFontSize(10);
+  doc.setFont('helvetica','bold');
+  doc.text('Delivered Signature', margin, y);
+  doc.rect(margin, y + 6, 180, 50);
+
+  doc.setFont('helvetica','italic');
+  doc.text('Thank You,', pageW - margin - 8, y + 30, { align:'right' });
+  doc.text('______________________', pageW - margin - 8, y + 50, { align:'right' });
+  doc.setFont('helvetica','bold');
+  doc.text('FAMOUS MEATS', pageW - margin - 8, y + 65, { align:'right' });
+
+  return doc;
+}
+
+function downloadInvoicePDF(order) {
+  const doc = generateInvoicePDF(order);
+  doc.save(`${order.invoiceNumber}.pdf`);
+}
+
+function saveOrder() {
+  const date = document.getElementById('orderDate').value;
+  const resto = document.getElementById('restaurant').value;
+  if (!date) return showToast('Pick a date');
+  if (!resto) return showToast('Pick a restaurant');
+  const lines = [];
+  document.querySelectorAll('#lineItems > .line-row').forEach(row => {
+    const item = row.querySelector('.line-item').value;
+    const lbs = parseFloat(row.querySelector('.line-lbs').value) || 0;
+    const price = parseFloat(row.querySelector('.line-price').value) || 0;
+    const cut = parseFloat(row.querySelector('.line-cutting').value) || 0;
+    if (item && lbs > 0) lines.push({ item, lbs, price, cutting: cut });
+  });
+  if (lines.length === 0) return showToast('Add at least one item with lbs');
+  const invoiceNumber = makeInvoiceNumber(resto, date);
+  const order = { id: Date.now(), date, restaurant: resto, lines, invoiceNumber };
+  const orders = JSON.parse(localStorage.getItem('fm_orders') || '[]');
+  orders.push(order);
+  localStorage.setItem('fm_orders', JSON.stringify(orders));
+  showToast('Order saved ✓ Generating PDF...');
+  setTimeout(() => downloadInvoicePDF(order), 300);
+  clearForm();
+}
+
+function clearForm() {
+  document.getElementById('orderDate').value = new Date().toISOString().slice(0,10);
+  document.getElementById('restaurant').value = '';
+  document.getElementById('lineItems').innerHTML = '';
+  addLine();
+  recalc();
+}
+
+function refresh() {
+  const orders = JSON.parse(localStorage.getItem('fm_orders') || '[]');
+  // sort by date desc
+  orders.sort((a,b) => b.date.localeCompare(a.date) || b.id - a.id);
+  let totalRev = 0, totalMargin = 0;
+  let html = '';
+  if (orders.length === 0) {
+    html = '<div class="empty-state"><div class="emoji">📋</div><div>No orders yet</div></div>';
+  } else {
+    orders.forEach(o => {
+      let oSub = 0, oCut = 0, oCost = 0;
+      o.lines.forEach(l => {
+        oSub += l.lbs * l.price;
+        oCut += l.cutting || 0;
+        oCost += l.lbs * (COSTS[l.item] || 0);
+      });
+      const oTotal = oSub + oCut;
+      const oMargin = oTotal - oCost;
+      const oPct = oTotal>0 ? (oMargin/oTotal*100) : 0;
+      totalRev += oTotal;
+      totalMargin += oMargin;
+      const lineHtml = o.lines.map(l => {
+        const t = l.lbs*l.price + (l.cutting||0);
+        return `<div class="item-line"><span>${l.item} — ${l.lbs} lb @ $${l.price.toFixed(2)}${l.cutting?' +$'+l.cutting.toFixed(2)+' cut':''}</span><span>$${t.toFixed(2)}</span></div>`;
+      }).join('');
+      html += `<div class="order-item">
+        <div class="top">
+          <div><div class="resto">${o.restaurant}</div><div class="date">${o.date}${o.invoiceNumber?' · '+o.invoiceNumber:''}</div></div>
+          <div style="display:flex; gap:6px;">
+            <button class="delete" style="color:#0a84ff;" onclick='downloadOrderPDF(${o.id})'>PDF</button>
+            <button class="delete" onclick="deleteOrder(${o.id})">Delete</button>
+          </div>
+        </div>
+        ${lineHtml}
+        <div class="totals"><span>Total $${oTotal.toFixed(2)}</span><span class="${oMargin>=0?'margin-pos':'margin-neg'}">Margin $${oMargin.toFixed(2)} (${oPct.toFixed(1)}%)</span></div>
+      </div>`;
+    });
+  }
+  document.getElementById('ordersList').innerHTML = html;
+  document.getElementById('statCount').textContent = orders.length;
+  document.getElementById('statRevenue').textContent = '$'+totalRev.toFixed(2);
+  document.getElementById('statMargin').textContent = '$'+totalMargin.toFixed(2);
+  document.getElementById('statPct').textContent = (totalRev>0?(totalMargin/totalRev*100):0).toFixed(1)+'%';
+}
+
+function deleteOrder(id) {
+  if (!confirm('Delete this order?')) return;
+  let orders = JSON.parse(localStorage.getItem('fm_orders') || '[]');
+  orders = orders.filter(o => o.id !== id);
+  localStorage.setItem('fm_orders', JSON.stringify(orders));
+  refresh();
+}
+
+function downloadOrderPDF(id) {
+  const orders = JSON.parse(localStorage.getItem('fm_orders') || '[]');
+  const o = orders.find(o => o.id === id);
+  if (!o) return;
+  if (!o.invoiceNumber) o.invoiceNumber = makeInvoiceNumber(o.restaurant, o.date);
+  downloadInvoicePDF(o);
+}
+
+function buildRows() {
+  const orders = JSON.parse(localStorage.getItem('fm_orders') || '[]');
+  orders.sort((a,b) => a.date.localeCompare(b.date) || a.id - b.id);
+  const rows = [['Date','Restaurant Name','Items','Lbs','Unit Price','Cutting Charges','Amount','Margin','margin Percentage']];
+  let gRev = 0, gMargin = 0;
+  orders.forEach(o => {
+    o.lines.forEach((l, idx) => {
+      const amt = l.lbs*l.price + (l.cutting||0);
+      const cost = l.lbs * (COSTS[l.item] || 0);
+      const margin = amt - cost;
+      const pct = amt>0 ? (margin/amt*100) : 0;
+      gRev += amt; gMargin += margin;
+      rows.push([
+        idx===0 ? o.date : '',
+        idx===0 ? o.restaurant : '',
+        l.item, l.lbs, l.price, l.cutting || '', amt, margin, pct
+      ]);
+    });
+  });
+  rows.push(['','','Total','','','', gRev, gMargin, gRev>0?(gMargin/gRev*100):0]);
+  return rows;
+}
+
+function exportXlsx() {
+  const rows = buildRows();
+  if (rows.length <= 2) return showToast('No orders to export');
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{wch:12},{wch:22},{wch:22},{wch:10},{wch:12},{wch:16},{wch:12},{wch:12},{wch:18}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+  const fname = `Resto_Details_${new Date().toISOString().slice(0,10)}.xlsx`;
+  XLSX.writeFile(wb, fname);
+  showToast('Exported ✓');
+}
+
+function exportCsv() {
+  const rows = buildRows();
+  if (rows.length <= 2) return showToast('No orders to export');
+  const csv = rows.map(r => r.map(c => {
+    if (c == null || c === '') return '';
+    const s = String(c);
+    return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+  }).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Resto_Details_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Exported ✓');
+}
+
+function backupJson() {
+  const data = localStorage.getItem('fm_orders') || '[]';
+  const blob = new Blob([data], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `famous_meats_backup_${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Backup saved ✓');
+}
+
+function restoreJson(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!Array.isArray(data)) throw new Error('bad');
+      if (!confirm(`Restore ${data.length} orders? This will replace current data.`)) return;
+      localStorage.setItem('fm_orders', JSON.stringify(data));
+      refresh();
+      showToast('Restored ✓');
+    } catch (err) { showToast('Invalid backup file'); }
+  };
+  r.readAsText(file);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+init();
+</script>
+</body>
+</html>
